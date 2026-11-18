@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radio Tec · La voz del Instituto</title>
+    <meta name="description" content="Radio Tec, la estación del Instituto Tecnológico Superior de Coalcomán: escucha en vivo, consulta la programación y descubre los podcasts.">
+    <meta name="theme-color" content="#04060b">
+    <!-- El sitio real vive en la computadora de la radio y llega por un túnel https (su dirección está en en-linea.json). -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https:; frame-src https:; base-uri 'none'; object-src 'none'; form-action 'none'">
+    <meta property="og:title" content="Radio Tec · La voz del Instituto">
+    <meta property="og:description" content="Escucha Radio Tec en vivo.">
+    <meta property="og:url" content="https://radio-tec.github.io/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/portal.css">
+    <script src="/portal.js" defer></script>
+</head>
+<body>
+<main class="aviso" id="aviso">
+    <div class="tarjeta">
+        <p class="marca">Radio <strong>Tec</strong></p>
+        <p class="lema">La voz del Instituto</p>
+        <div class="estado" id="estado" role="status" aria-live="polite">
+            <span class="punto" aria-hidden="true"></span>
+            <span id="estado-texto">Conectando con la estación…</span>
+        </div>
+        <p class="detalle" id="detalle"></p>
+        <button class="boton" id="reintentar" type="button" hidden>Intentar de nuevo</button>
+        <noscript><p class="detalle">Activa JavaScript para escuchar Radio Tec.</p></noscript>
+    </div>
+</main>
+<iframe class="sitio" id="sitio" title="Radio Tec" allow="autoplay; fullscreen; clipboard-write; web-share" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
+</body>
+</html>
