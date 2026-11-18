@@ -45,14 +45,33 @@
         botonReintentar.hidden = !fuera;
     }
 
-    /** Lee la dirección vigente del túnel (sin caché: cambia cada vez que se enciende la radio). */
-    async function leerDireccion() {
-        const r = await fetch('/en-linea.json?t=' + Date.now(), { cache: 'no-store' });
+    /**
+     * Lee la dirección vigente del túnel (sin caché: cambia cada vez que se enciende la radio).
+     * GitHub Pages tarda ~1 minuto en publicar un cambio; la API de GitHub lo tiene al instante
+     * (se usa solo de respaldo: permite 60 consultas por hora a cada visitante).
+     */
+    const API_ESTADO = 'https://api.github.com/repos/radio-tec/radio-tec.github.io/contents/en-linea.json';
+
+    async function leerDireccion(desdeApi) {
+        const r = desdeApi
+            ? await fetch(API_ESTADO + '?ref=main&t=' + Date.now(), { cache: 'no-store', headers: { Accept: 'application/vnd.github.raw+json' } })
+            : await fetch('/en-linea.json?t=' + Date.now(), { cache: 'no-store' });
         if (!r.ok) { throw new Error('sin en-linea.json'); }
         const d = await r.json();
         const url = String((d && d.url) || '').replace(/\/+$/, '');
         if (!/^https:\/\/[A-Za-z0-9.-]+$/.test(url)) { throw new Error('la estación no ha publicado su dirección'); }
         return url;
+    }
+
+    /** Dirección que de verdad responde: primero la de Pages y, si no sirve, la recién publicada en la API. */
+    async function direccionViva() {
+        let url = '';
+        try { url = await leerDireccion(false); } catch (_) { url = ''; }
+        if (url && await responde(url)) { return url; }
+        let nueva = '';
+        try { nueva = await leerDireccion(true); } catch (_) { nueva = ''; }
+        if (nueva && nueva !== url && await responde(nueva)) { return nueva; }
+        return '';
     }
 
     /** ¿Responde de verdad la radio en esa dirección? (un túnel apagado contesta con un error de Cloudflare) */
@@ -79,10 +98,9 @@
     async function conectar() {
         clearTimeout(reloj);
         if (!actual) { mostrarAviso('Conectando con la estación…', '', false); }
-        let url = '';
-        try { url = await leerDireccion(); } catch (_) { url = ''; }
+        const url = await direccionViva();
 
-        if (url && await responde(url)) {
+        if (url) {
             fallosSeguidos = 0;
             if (esPanel) { location.replace(destino(url)); return; }
             if (url !== actual) {                         // primera vez o la radio cambió de túnel
